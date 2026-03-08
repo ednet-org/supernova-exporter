@@ -1,22 +1,22 @@
 {
   "colorTokens": [
-    { "name": "brand/primary", "tokenType": "color", "value": { "color": { "r": 0, "g": 0.4, "b": 1, "a": 1 } } },
-    { "name": "brand/onPrimary", "tokenType": "color", "value": { "color": { "r": 1, "g": 1, "b": 1, "a": 1 } } },
-    { "name": "semantic/success", "tokenType": "color", "value": { "color": { "r": 0.133, "g": 0.773, "b": 0.369, "a": 1 } } },
-    { "name": "semantic/error", "tokenType": "color", "value": { "color": { "r": 0.898, "g": 0.224, "b": 0.208, "a": 1 } } }
+    { "name": "brand/primary", "tokenType": "Color", "value": { "color": { "r": 0, "g": 102, "b": 255 }, "opacity": { "unit": "Raw", "measure": 1 }, "referencedTokenId": null } },
+    { "name": "brand/onPrimary", "tokenType": "Color", "value": { "color": { "r": 255, "g": 255, "b": 255 }, "opacity": { "unit": "Raw", "measure": 1 }, "referencedTokenId": null } },
+    { "name": "semantic/success", "tokenType": "Color", "value": { "color": { "r": 34, "g": 197, "b": 94 }, "opacity": { "unit": "Raw", "measure": 1 }, "referencedTokenId": null } },
+    { "name": "semantic/error", "tokenType": "Color", "value": { "color": { "r": 229, "g": 57, "b": 53 }, "opacity": { "unit": "Raw", "measure": 1 }, "referencedTokenId": null } }
   ],
   "spacingTokens": [
-    { "name": "spacing/xxs", "tokenType": "space", "value": { "measure": 2, "unit": "px" } },
-    { "name": "spacing/xs", "tokenType": "space", "value": { "measure": 4, "unit": "px" } },
-    { "name": "spacing/sm", "tokenType": "space", "value": { "measure": 8, "unit": "px" } },
-    { "name": "spacing/md", "tokenType": "space", "value": { "measure": 12, "unit": "px" } },
-    { "name": "spacing/lg", "tokenType": "space", "value": { "measure": 16, "unit": "px" } }
+    { "name": "spacing/xxs", "tokenType": "Space", "value": { "measure": 2, "unit": "Pixels", "referencedTokenId": null } },
+    { "name": "spacing/xs", "tokenType": "Space", "value": { "measure": 4, "unit": "Pixels", "referencedTokenId": null } },
+    { "name": "spacing/sm", "tokenType": "Space", "value": { "measure": 8, "unit": "Pixels", "referencedTokenId": null } },
+    { "name": "spacing/md", "tokenType": "Space", "value": { "measure": 12, "unit": "Pixels", "referencedTokenId": null } },
+    { "name": "spacing/lg", "tokenType": "Space", "value": { "measure": 16, "unit": "Pixels", "referencedTokenId": null } }
   ],
   "typographyTokens": [
-    { "name": "type/displayLarge", "tokenType": "typography", "value": { "font": { "family": "Roboto", "subfamily": "Regular" }, "fontSize": { "measure": 57, "unit": "px" }, "lineHeight": { "measure": 64, "unit": "px" }, "letterSpacing": { "measure": -0.25, "unit": "px" } } }
+    { "name": "type/displayLarge", "tokenType": "Typography", "value": { "fontFamily": { "text": "Roboto", "referencedTokenId": null }, "fontWeight": { "text": "Regular", "referencedTokenId": null }, "fontSize": { "measure": 57, "unit": "Pixels", "referencedTokenId": null }, "lineHeight": { "measure": 64, "unit": "Pixels", "referencedTokenId": null }, "letterSpacing": { "measure": -0.25, "unit": "Pixels", "referencedTokenId": null }, "textDecoration": { "value": "None", "referencedTokenId": null }, "textCase": { "value": "Original", "referencedTokenId": null }, "paragraphSpacing": { "measure": 0, "unit": "Pixels", "referencedTokenId": null }, "referencedTokenId": null } }
   ],
   "opacityTokens": [
-    { "name": "opacity/disabled", "tokenType": "opacity", "value": { "measure": 0.38 } },
-    { "name": "opacity/hover", "tokenType": "opacity", "value": { "measure": 0.08 } }
+    { "name": "opacity/disabled", "tokenType": "Opacity", "value": { "measure": 0.38, "unit": "Raw", "referencedTokenId": null } },
+    { "name": "opacity/hover", "tokenType": "Opacity", "value": { "measure": 0.08, "unit": "Raw", "referencedTokenId": null } }
   ]
 }

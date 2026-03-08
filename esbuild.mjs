@@ -6,12 +6,11 @@ const options = {
   entryPoints: ['src/index.ts'],
   bundle: true,
   outfile: 'dist/build.js',
-  platform: 'neutral',
+  platform: 'node',
   target: 'es2020',
-  format: 'esm',
+  format: 'cjs',
   minify: !isWatch,
-  sourcemap: true,
-  external: ['@supernovaio/sdk'],
+  sourcemap: false,
 };
 
 async function run() {

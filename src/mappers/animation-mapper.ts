@@ -1,9 +1,13 @@
 import { tokenNameToDartIdentifier } from '../helpers/naming';
 
-/** Duration token value from Supernova SDK. */
+/**
+ * Duration token value from Supernova SDK.
+ * SDK type: DurationTokenValue = { unit: MsUnit, measure: number, referencedTokenId }
+ */
 export interface DurationTokenValue {
-  duration: number; // milliseconds
-  referencedTokenId?: string;
+  unit: string; // 'ms'
+  measure: number; // milliseconds
+  referencedTokenId?: string | null;
 }
 
 /** Mapped animation field for Dart output. */
@@ -19,9 +23,10 @@ export function mapAnimationToken(token: {
   description?: string;
   value: DurationTokenValue;
 }): MappedAnimationField {
+  const ms = token.value.measure ?? 0;
   return {
     name: tokenNameToDartIdentifier(token.name),
-    dartValue: `Duration(milliseconds: ${Math.round(token.value.duration)})`,
-    docComment: token.description ?? `Animation duration (${token.value.duration}ms).`,
+    dartValue: `Duration(milliseconds: ${Math.round(ms)})`,
+    docComment: token.description ?? `Animation duration (${ms}ms).`,
   };
 }

@@ -4,25 +4,28 @@
  * that we use in our generators.
  */
 
-/** Supernova token type enum values we support. */
+/**
+ * Supernova SDK TokenType enum values (PascalCase strings).
+ * Must match the runtime values from @supernovaio/sdk-exporters TokenType enum.
+ */
 export type SupportedTokenType =
-  | 'color'
-  | 'typography'
-  | 'dimension'
-  | 'size'
-  | 'space'
-  | 'opacity'
-  | 'fontSize'
-  | 'lineHeight'
-  | 'letterSpacing'
-  | 'borderWidth'
-  | 'radius'
-  | 'duration'
-  | 'shadow'
-  | 'border'
-  | 'gradient'
-  | 'fontFamily'
-  | 'fontWeight';
+  | 'Color'
+  | 'Typography'
+  | 'Dimension'
+  | 'Size'
+  | 'Space'
+  | 'Opacity'
+  | 'FontSize'
+  | 'LineHeight'
+  | 'LetterSpacing'
+  | 'BorderWidth'
+  | 'BorderRadius'
+  | 'Duration'
+  | 'Shadow'
+  | 'Border'
+  | 'Gradient'
+  | 'FontFamily'
+  | 'FontWeight';
 
 /** Token categories that map to specific Dart output files. */
 export interface TokenCategory {
@@ -32,61 +35,61 @@ export interface TokenCategory {
   tokenTypes: SupportedTokenType[];
 }
 
-/** Define the token categories and their mappings. */
+/** Define the token categories and their mappings to SDK TokenType enum values. */
 export const TOKEN_CATEGORIES: TokenCategory[] = [
   {
     name: 'colors',
     dartClassName: 'Colors',
     dartFileName: 'colors.g.dart',
-    tokenTypes: ['color'],
+    tokenTypes: ['Color'],
   },
   {
     name: 'spacing',
     dartClassName: 'Spacing',
     dartFileName: 'spacing.g.dart',
-    tokenTypes: ['space', 'size', 'dimension'],
+    tokenTypes: ['Space', 'Size', 'Dimension'],
   },
   {
     name: 'typography',
     dartClassName: 'Typography',
     dartFileName: 'typography.g.dart',
-    tokenTypes: ['typography', 'fontSize'],
+    tokenTypes: ['Typography', 'FontSize'],
   },
   {
     name: 'elevation',
     dartClassName: 'Elevation',
     dartFileName: 'elevation.g.dart',
-    tokenTypes: ['shadow'],
+    tokenTypes: ['Shadow'],
   },
   {
     name: 'borders',
     dartClassName: 'Borders',
     dartFileName: 'borders.g.dart',
-    tokenTypes: ['border', 'borderWidth', 'radius'],
+    tokenTypes: ['Border', 'BorderWidth', 'BorderRadius'],
   },
   {
     name: 'animation',
     dartClassName: 'Animation',
     dartFileName: 'animation.g.dart',
-    tokenTypes: ['duration'],
+    tokenTypes: ['Duration'],
   },
   {
     name: 'opacity',
     dartClassName: 'Opacity',
     dartFileName: 'opacity.g.dart',
-    tokenTypes: ['opacity'],
+    tokenTypes: ['Opacity'],
   },
   {
     name: 'gradients',
     dartClassName: 'Gradients',
     dartFileName: 'gradients.g.dart',
-    tokenTypes: ['gradient'],
+    tokenTypes: ['Gradient'],
   },
   {
     name: 'fontWeights',
     dartClassName: 'FontWeights',
     dartFileName: 'font_weights.g.dart',
-    tokenTypes: ['fontWeight'],
+    tokenTypes: ['FontWeight'],
   },
 ];
 

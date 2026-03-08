@@ -1,15 +1,27 @@
-import { floatColorToDartHex, formatDouble } from '../helpers/dart-formatter';
+import { formatDouble } from '../helpers/dart-formatter';
 import { tokenNameToDartIdentifier } from '../helpers/naming';
 
-/** Shadow token value from Supernova SDK. */
+/**
+ * Shadow token value from Supernova SDK.
+ * SDK type: ShadowTokenValue = {
+ *   color: ColorTokenValue,  // { color: { r, g, b }, opacity: { measure } }
+ *   x: number, y: number, radius: number, spread: number,
+ *   opacity?: OpacityTokenValue, type: ShadowType, referencedTokenId
+ * }
+ * Shadow tokens have value as ShadowTokenValue[] (array of layers).
+ */
 export interface ShadowTokenValue {
-  color: { r: number; g: number; b: number; a: number };
-  x: { measure: number; unit: string };
-  y: { measure: number; unit: string };
-  radius: { measure: number; unit: string };
-  spread: { measure: number; unit: string };
-  opacity: number;
-  referencedTokenId?: string;
+  color: {
+    color: { r: number; g: number; b: number };
+    opacity: { measure: number };
+  };
+  x: number;
+  y: number;
+  radius: number;
+  spread: number;
+  opacity?: { unit: string; measure: number };
+  type: string;
+  referencedTokenId?: string | null;
 }
 
 /** Mapped elevation field for Dart output. */
@@ -19,7 +31,7 @@ export interface MappedElevationField {
   docComment?: string;
 }
 
-/** Map a Supernova shadow token to a Dart BoxShadow list. */
+/** Map a Supernova shadow token to a Dart elevation constant. */
 export function mapElevationToken(token: {
   name: string;
   description?: string;
@@ -27,7 +39,7 @@ export function mapElevationToken(token: {
 }): MappedElevationField {
   const shadows = Array.isArray(token.value) ? token.value : [token.value];
 
-  if (shadows.length === 0 || (shadows.length === 1 && shadows[0].radius.measure === 0 && shadows[0].x.measure === 0 && shadows[0].y.measure === 0)) {
+  if (shadows.length === 0 || (shadows.length === 1 && shadows[0].radius === 0 && shadows[0].x === 0 && shadows[0].y === 0)) {
     return {
       name: tokenNameToDartIdentifier(token.name),
       dartValue: '0.0',
@@ -35,12 +47,11 @@ export function mapElevationToken(token: {
     };
   }
 
-  // For simple elevation, just use the blur radius as the elevation value
-  // (matching Material 3 convention where elevation = blur radius proxy)
+  // Use the blur radius as the elevation value (Material 3 convention)
   const primaryShadow = shadows[0];
   return {
     name: tokenNameToDartIdentifier(token.name),
-    dartValue: formatDouble(primaryShadow.radius.measure),
-    docComment: token.description ?? `Elevation level (${primaryShadow.radius.measure}px blur).`,
+    dartValue: formatDouble(primaryShadow.radius),
+    docComment: token.description ?? `Elevation level (${primaryShadow.radius}px blur).`,
   };
 }

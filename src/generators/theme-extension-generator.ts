@@ -83,7 +83,7 @@ export class ThemeExtensionGenerator {
     const prefix = this.config.classPrefix;
 
     // Spacing wrapper
-    const spacingTokens = filterTokensByType(tokens, ['space', 'size', 'dimension']);
+    const spacingTokens = filterTokensByType(tokens, ['Space', 'Size', 'Dimension']);
     if (spacingTokens.length > 0) {
       wrappers.push({
         className: `${prefix}SpacingTokensGen`,
@@ -99,7 +99,7 @@ export class ThemeExtensionGenerator {
     }
 
     // Border wrapper
-    const borderTokens = filterTokensByType(tokens, ['radius', 'borderWidth']);
+    const borderTokens = filterTokensByType(tokens, ['BorderRadius', 'BorderWidth']);
     if (borderTokens.length > 0) {
       wrappers.push({
         className: `${prefix}BorderTokensGen`,
@@ -115,7 +115,7 @@ export class ThemeExtensionGenerator {
     }
 
     // Color wrapper
-    const colorTokens = filterTokensByType(tokens, ['color']);
+    const colorTokens = filterTokensByType(tokens, ['Color']);
     if (colorTokens.length > 0) {
       wrappers.push({
         className: `${prefix}ColorTokensGen`,
@@ -130,14 +130,17 @@ export class ThemeExtensionGenerator {
 
   /** Build color wrapper fields from color tokens. */
   private buildColorFields(tokens: any[]): WrapperField[] {
+    const toHex = (v: number) =>
+      Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0').toUpperCase();
+
     return tokens.slice(0, 50).map((t) => {
-      const { r, g, b, a } = t.value?.color ?? { r: 0, g: 0, b: 0, a: 1 };
-      const alpha = Math.round(a * 255);
-      const red = Math.round(r * 255);
-      const green = Math.round(g * 255);
-      const blue = Math.round(b * 255);
-      const toHex = (v: number) =>
-        Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0').toUpperCase();
+      // SDK ColorTokenValue: { color: { r, g, b }, opacity: { measure } }
+      const colorVal = t.value?.color ?? { r: 0, g: 0, b: 0 };
+      const opacityVal = t.value?.opacity ?? { measure: 1 };
+      const alpha = Math.round((opacityVal.measure ?? 1) * 255);
+      const red = Math.round(colorVal.r ?? 0);
+      const green = Math.round(colorVal.g ?? 0);
+      const blue = Math.round(colorVal.b ?? 0);
 
       return {
         name: toCamelCase(t.name.split('/').pop() ?? t.name),

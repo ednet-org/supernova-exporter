@@ -1,15 +1,25 @@
-import { floatColorToDartHex, colorToDartHex } from '../helpers/dart-formatter';
+import { floatColorToDartHex } from '../helpers/dart-formatter';
 import { tokenNameToDartIdentifier } from '../helpers/naming';
 
-/** Color token value from Supernova SDK. */
+/**
+ * Color token value from Supernova SDK.
+ * SDK type: ColorTokenValue = { color: ColorValue, opacity: OpacityTokenValue, referencedTokenId }
+ * ColorValue = { r, g, b, referencedTokenId }
+ * OpacityTokenValue = { unit, measure, referencedTokenId }
+ */
 export interface ColorTokenValue {
   color: {
-    r: number; // 0-1
-    g: number; // 0-1
-    b: number; // 0-1
-    a: number; // 0-1
+    r: number; // 0-255
+    g: number; // 0-255
+    b: number; // 0-255
+    referencedTokenId?: string | null;
   };
-  referencedTokenId?: string;
+  opacity: {
+    unit: string;
+    measure: number; // 0-1
+    referencedTokenId?: string | null;
+  };
+  referencedTokenId?: string | null;
 }
 
 /** Mapped color field for Dart output. */
@@ -25,10 +35,15 @@ export function mapColorToken(token: {
   description?: string;
   value: ColorTokenValue;
 }): MappedColorField {
-  const { r, g, b, a } = token.value.color;
+  const { color, opacity } = token.value;
+  // SDK provides r/g/b as 0-255 integers, opacity as 0-1 float
+  const r = color.r ?? 0;
+  const g = color.g ?? 0;
+  const b = color.b ?? 0;
+  const a = opacity?.measure ?? 1;
   return {
     name: tokenNameToDartIdentifier(token.name),
-    dartValue: floatColorToDartHex(r, g, b, a),
+    dartValue: floatColorToDartHex(r / 255, g / 255, b / 255, a),
     docComment: token.description || undefined,
   };
 }

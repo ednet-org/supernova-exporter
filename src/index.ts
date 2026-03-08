@@ -3,10 +3,15 @@
  *
  * Generates Dart token files, Flutter ThemeData, and EDNet DSL v2 YAML
  * from Supernova design tokens. Runs inside Supernova's secure sandbox.
- *
- * Entry point: Pulsar.export(async (sdk, context) => [...])
  */
 
+import {
+  Supernova,
+  PulsarContext,
+  RemoteVersionIdentifier,
+  AnyOutputFile,
+} from '@supernovaio/sdk-exporters';
+import { FileHelper } from '@supernovaio/export-helpers';
 import { ExporterConfig } from './config/config-types';
 import { resolveConfig } from './config/config-defaults';
 import { TokenGenerator } from './generators/token-generator';
@@ -17,70 +22,97 @@ import { EdnetDslGenerator } from './generators/ednet-dsl-generator';
 import { BrandResolver } from './helpers/brand-resolver';
 import { OutputFile } from './helpers/file-builder';
 
-// Supernova Pulsar globals (injected by runtime)
-declare const Pulsar: {
-  export: (
-    fn: (
-      sdk: any,
-      context: any,
-    ) => Promise<any[]>,
-  ) => void;
-  exportConfig: <T>() => T;
-};
-
-declare const FileHelper: {
-  createTextFile: (opts: {
-    relativePath: string;
-    fileName: string;
-    content: string;
-  }) => any;
-};
+/** Resolved exporter configuration */
+export const exportConfiguration =
+  Pulsar.exportConfig<ExporterConfig>();
 
 Pulsar.export(
-  async (sdk: any, context: any): Promise<any[]> => {
-    const userConfig =
-      Pulsar.exportConfig<Partial<ExporterConfig>>();
-    const config = resolveConfig(userConfig);
+  async (
+    sdk: Supernova,
+    context: PulsarContext,
+  ): Promise<Array<AnyOutputFile>> => {
+    const config = resolveConfig(exportConfiguration);
 
     // Build remote version identifier per Supernova SDK
-    const remoteVersionIdentifier = {
-      designSystemId: context.dsId,
-      versionId: context.versionId,
-    };
+    const remoteVersionIdentifier: RemoteVersionIdentifier =
+      {
+        designSystemId: context.dsId,
+        versionId: context.versionId,
+      };
 
     // Resolve brand/theme from pipeline context
     const brandResolver = new BrandResolver(
-      context.brandId,
-      context.themeId,
+      context.brandId ?? undefined,
+      context.themeIds
+        ? context.themeIds[0]
+        : undefined,
     );
 
-    // Collect all output files
-    const outputFiles: OutputFile[] = [];
-
-    // Fetch all tokens via SDK
-    let allTokens = await sdk.tokens.getTokens(
+    // Fetch all tokens (unfiltered — needed for theme reference resolution)
+    const fullTokenSet = await sdk.tokens.getTokens(
       remoteVersionIdentifier,
     );
     const tokenGroups = await sdk.tokens.getTokenGroups(
       remoteVersionIdentifier,
     );
 
-    // Apply theme overrides if a theme is selected
-    if (context.themeId) {
-      const themes = await sdk.tokens.getTokenThemes(
+    // Start with full set, apply brand filter and themes
+    let tokens = [...fullTokenSet];
+
+    // Filter by brand if specified
+    if (context.brandId) {
+      const brands = await sdk.brands.getBrands(
         remoteVersionIdentifier,
       );
-      const selectedTheme = themes.find(
-        (t: any) => t.id === context.themeId,
+      const brand = brands.find(
+        (b) =>
+          b.id === context.brandId ||
+          b.idInVersion === context.brandId,
       );
-      if (selectedTheme) {
-        allTokens =
-          await sdk.tokens.computeTokensByApplyingThemes(
-            allTokens,
-            [selectedTheme],
-          );
+      if (brand) {
+        tokens = tokens.filter(
+          (t) => t.brandId === brand.id,
+        );
       }
     }
+
+    // Apply theme overrides if themes are selected
+    if (context.themeIds && context.themeIds.length > 0) {
+      try {
+        const themes = await sdk.tokens.getTokenThemes(
+          remoteVersionIdentifier,
+        );
+        const themesToApply = context.themeIds
+          .map((tid) =>
+            themes.find(
+              (t) =>
+                t.id === tid || t.idInVersion === tid,
+            ),
+          )
+          .filter(
+            (t): t is NonNullable<typeof t> => t != null,
+          );
+        if (themesToApply.length > 0) {
+          // First arg = full unfiltered set (for reference resolution)
+          // Second arg = tokens to transform
+          // Third arg = themes to apply
+          tokens =
+            sdk.tokens.computeTokensByApplyingThemes(
+              fullTokenSet,
+              tokens,
+              themesToApply,
+            );
+        }
+      } catch (e) {
+        // Theme application failed — continue with base tokens
+        console.warn(
+          `[EDNet Exporter] Theme application failed, using base tokens: ${e}`,
+        );
+      }
+    }
+
+    // Collect all output files
+    const outputFiles: OutputFile[] = [];
 
     // Phase 1: Token files
     if (config.generateTokenFiles) {
@@ -88,7 +120,7 @@ Pulsar.export(
         config,
         brandResolver,
       );
-      outputFiles.push(...tokenGen.generate(allTokens));
+      outputFiles.push(...tokenGen.generate(tokens));
     }
 
     // Phase 2: ThemeData
@@ -97,23 +129,24 @@ Pulsar.export(
         config,
         brandResolver,
       );
-      outputFiles.push(...themeGen.generate(allTokens));
+      outputFiles.push(...themeGen.generate(tokens));
     }
 
-    // Phase 2: ThemeExtension with lerp/copyWith
+    // Phase 2b: ThemeExtension with lerp/copyWith
     if (config.generateThemeExtension) {
       const extGen = new ThemeExtensionGenerator(
         config,
         brandResolver,
       );
-      outputFiles.push(...extGen.generate(allTokens));
+      outputFiles.push(...extGen.generate(tokens));
     }
 
     // Phase 3: EDNet DSL v2 YAML from components
     if (config.generateEdnetDsl) {
-      const components = await sdk.components.getComponents(
-        remoteVersionIdentifier,
-      );
+      const components =
+        await sdk.components.getComponents(
+          remoteVersionIdentifier,
+        );
       const componentGroups =
         await sdk.components.getComponentGroups(
           remoteVersionIdentifier,
@@ -121,7 +154,10 @@ Pulsar.export(
 
       const dslGen = new EdnetDslGenerator(config);
       outputFiles.push(
-        ...dslGen.generate(components, componentGroups),
+        ...dslGen.generate(
+          components,
+          componentGroups as any[],
+        ),
       );
     }
 
@@ -130,7 +166,9 @@ Pulsar.export(
       config,
       brandResolver,
     );
-    outputFiles.push(...brandThemeGen.generate(allTokens));
+    outputFiles.push(
+      ...brandThemeGen.generate(tokens),
+    );
 
     // Convert OutputFile[] to Supernova AnyOutputFile[]
     return outputFiles.map((f) =>

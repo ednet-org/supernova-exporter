@@ -171,7 +171,7 @@ export class TokenGenerator {
     const widthFields: ClassField[] = [];
 
     for (const token of tokens) {
-      if (token.tokenType === 'radius') {
+      if (token.tokenType === 'BorderRadius') {
         const mapped = mapRadiusToken(token as any);
         radiusFields.push({
           name: mapped.name,
@@ -240,14 +240,33 @@ export class TokenGenerator {
   }
 
   private buildFontWeightSections(tokens: any[]): ClassSection[] {
+    const weightMap: Record<string, number> = {
+      thin: 100, hairline: 100,
+      extralight: 200, ultralight: 200,
+      light: 300,
+      regular: 400, normal: 400,
+      medium: 500,
+      semibold: 600, demibold: 600,
+      bold: 700,
+      extrabold: 800, ultrabold: 800,
+      black: 900, heavy: 900,
+    };
+
     const fields: ClassField[] = tokens.map((token) => {
-      const value = (token.value as any).measure ?? 400;
+      // FontWeight is a StringToken in SDK: value = { text: "Bold", referencedTokenId }
+      const text = (token.value as any).text ?? 'Regular';
+      const lower = text.toLowerCase().replace(/[\s-_]/g, '');
+      const num = parseInt(text, 10);
+      const weight = !isNaN(num) && num >= 100 && num <= 900
+        ? Math.round(num / 100) * 100
+        : (weightMap[lower] ?? 400);
+
       const name = token.name.split('/').pop() ?? token.name;
       return {
         name: name.charAt(0).toLowerCase() + name.slice(1),
         type: 'FontWeight',
-        value: `FontWeight.w${Math.round(value)}`,
-        docComment: token.description ?? `Font weight ${value}.`,
+        value: `FontWeight.w${weight}`,
+        docComment: token.description ?? `Font weight ${text}.`,
       };
     });
     return [{ comment: 'Font Weights', fields }];

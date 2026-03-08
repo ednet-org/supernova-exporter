@@ -6,27 +6,31 @@ import { DEFAULT_CONFIG } from '../../src/config/config-defaults';
 function makeSpacingToken(name: string, value: number) {
   return {
     name,
-    tokenType: 'space',
+    tokenType: 'Space',
     description: `Spacing ${name}`,
-    value: { measure: value },
+    value: { measure: value, unit: 'Pixels', referencedTokenId: null },
   };
 }
 
 function makeColorToken(name: string, r: number, g: number, b: number) {
   return {
     name,
-    tokenType: 'color',
+    tokenType: 'Color',
     description: `Color ${name}`,
-    value: { color: { r, g, b, a: 1 } },
+    value: {
+      color: { r, g, b, referencedTokenId: null },
+      opacity: { unit: 'Raw', measure: 1, referencedTokenId: null },
+      referencedTokenId: null,
+    },
   };
 }
 
 function makeBorderToken(name: string, value: number) {
   return {
     name,
-    tokenType: 'radius',
+    tokenType: 'BorderRadius',
     description: `Radius ${name}`,
-    value: { measure: value },
+    value: { measure: value, unit: 'Pixels', referencedTokenId: null },
   };
 }
 
@@ -82,7 +86,7 @@ describe('ThemeExtensionGenerator', () => {
   it('generates ThemeExtension class', () => {
     const tokens = [
       makeSpacingToken('spacing/sm', 8),
-      makeColorToken('primary/default', 0.5, 0.5, 0.5),
+      makeColorToken('primary/default', 128, 128, 128),
     ];
     const files = generator.generate(tokens);
     const content = files[0].content;
@@ -95,7 +99,7 @@ describe('ThemeExtensionGenerator', () => {
   });
 
   it('generates color wrapper with Color.lerp', () => {
-    const tokens = [makeColorToken('primary/default', 0.5, 0.5, 0.5)];
+    const tokens = [makeColorToken('primary/default', 128, 128, 128)];
     const files = generator.generate(tokens);
     const content = files[0].content;
 
