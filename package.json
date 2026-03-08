@@ -1,0 +1,22 @@
+{
+  "name": "ednet-supernova-exporter",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Supernova exporter for EDNet Design System — generates Dart tokens, Flutter ThemeData, and EDNet DSL v2 YAML",
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@supernovaio/export-helpers": "^1.0.0"
+  },
+  "devDependencies": {
+    "@supernovaio/sdk": "^2.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0"
+  }
+}

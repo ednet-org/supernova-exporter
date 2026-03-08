@@ -1,0 +1,22 @@
+{
+  "colorTokens": [
+    { "name": "brand/primary", "tokenType": "color", "value": { "color": { "r": 0, "g": 0.4, "b": 1, "a": 1 } } },
+    { "name": "brand/onPrimary", "tokenType": "color", "value": { "color": { "r": 1, "g": 1, "b": 1, "a": 1 } } },
+    { "name": "semantic/success", "tokenType": "color", "value": { "color": { "r": 0.133, "g": 0.773, "b": 0.369, "a": 1 } } },
+    { "name": "semantic/error", "tokenType": "color", "value": { "color": { "r": 0.898, "g": 0.224, "b": 0.208, "a": 1 } } }
+  ],
+  "spacingTokens": [
+    { "name": "spacing/xxs", "tokenType": "space", "value": { "measure": 2, "unit": "px" } },
+    { "name": "spacing/xs", "tokenType": "space", "value": { "measure": 4, "unit": "px" } },
+    { "name": "spacing/sm", "tokenType": "space", "value": { "measure": 8, "unit": "px" } },
+    { "name": "spacing/md", "tokenType": "space", "value": { "measure": 12, "unit": "px" } },
+    { "name": "spacing/lg", "tokenType": "space", "value": { "measure": 16, "unit": "px" } }
+  ],
+  "typographyTokens": [
+    { "name": "type/displayLarge", "tokenType": "typography", "value": { "font": { "family": "Roboto", "subfamily": "Regular" }, "fontSize": { "measure": 57, "unit": "px" }, "lineHeight": { "measure": 64, "unit": "px" }, "letterSpacing": { "measure": -0.25, "unit": "px" } } }
+  ],
+  "opacityTokens": [
+    { "name": "opacity/disabled", "tokenType": "opacity", "value": { "measure": 0.38 } },
+    { "name": "opacity/hover", "tokenType": "opacity", "value": { "measure": 0.08 } }
+  ]
+}

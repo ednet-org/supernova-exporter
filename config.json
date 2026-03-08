@@ -1,0 +1,60 @@
+{
+  "properties": [
+    {
+      "key": "outputPath",
+      "type": "string",
+      "label": "Output Path",
+      "description": "Base path for generated Dart files relative to package root",
+      "default": "lib/src/generated"
+    },
+    {
+      "key": "packageName",
+      "type": "string",
+      "label": "Package Name",
+      "description": "Dart package name for import paths",
+      "default": "ednet_design_system"
+    },
+    {
+      "key": "generateTokenFiles",
+      "type": "boolean",
+      "label": "Generate Token Files",
+      "description": "Generate individual Dart token constant files",
+      "default": true
+    },
+    {
+      "key": "generateThemeData",
+      "type": "boolean",
+      "label": "Generate ThemeData",
+      "description": "Generate complete Flutter ThemeData builder function",
+      "default": true
+    },
+    {
+      "key": "generateThemeExtension",
+      "type": "boolean",
+      "label": "Generate ThemeExtension",
+      "description": "Generate EdnetTokens ThemeExtension with lerp support",
+      "default": true
+    },
+    {
+      "key": "generateEdnetDsl",
+      "type": "boolean",
+      "label": "Generate EDNet DSL v2 YAML",
+      "description": "Generate domain model YAML from component structure",
+      "default": false
+    },
+    {
+      "key": "classPrefix",
+      "type": "string",
+      "label": "Class Prefix",
+      "description": "Prefix for generated Dart class names (e.g. Ednet, Morfik)",
+      "default": "Ednet"
+    },
+    {
+      "key": "includeDocComments",
+      "type": "boolean",
+      "label": "Include Doc Comments",
+      "description": "Add /// doc comments to generated Dart code",
+      "default": true
+    }
+  ]
+}

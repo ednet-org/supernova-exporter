@@ -1,0 +1,13 @@
+{
+  "id": "ednet.exporter-flutter",
+  "name": "EDNet Design System Flutter Exporter",
+  "description": "Generates Dart token files, Flutter ThemeData, and EDNet DSL v2 YAML from Supernova design tokens.",
+  "version": "0.1.0",
+  "author": "EDNet Platform",
+  "organization": "EDNet",
+  "source": "src/index.ts",
+  "engine": "pulsar-v3",
+  "usesBrands": true,
+  "usesThemes": true,
+  "config": "config.json"
+}
