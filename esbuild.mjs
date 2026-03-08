@@ -5,7 +5,7 @@ const isWatch = process.argv.includes('--watch');
 const options = {
   entryPoints: ['src/index.ts'],
   bundle: true,
-  outfile: 'dist/index.js',
+  outfile: 'dist/build.js',
   platform: 'neutral',
   target: 'es2020',
   format: 'esm',

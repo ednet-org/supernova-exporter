@@ -1,58 +1,64 @@
-{
-  "outputPath": {
+[
+  {
     "key": "outputPath",
     "type": "string",
     "default": "lib/src/generated",
     "title": "Output Path",
     "description": "Base path for generated Dart files relative to package root."
   },
-  "packageName": {
+  {
     "key": "packageName",
     "type": "string",
     "default": "ednet_design_system",
     "title": "Package Name",
     "description": "Dart package name for import paths."
   },
-  "generateTokenFiles": {
+  {
     "key": "generateTokenFiles",
     "type": "boolean",
     "default": true,
     "title": "Generate Token Files",
-    "description": "Generate individual Dart token constant files (colors, spacing, typography, etc.)."
+    "description": "Generate individual Dart token constant files (colors, spacing, typography, etc.).",
+    "category": "Generators"
   },
-  "generateThemeData": {
+  {
     "key": "generateThemeData",
     "type": "boolean",
     "default": true,
     "title": "Generate ThemeData",
-    "description": "Generate complete Flutter ThemeData builder function with Material 3 component themes."
+    "description": "Generate complete Flutter ThemeData builder function with Material 3 component themes.",
+    "category": "Generators"
   },
-  "generateThemeExtension": {
+  {
     "key": "generateThemeExtension",
     "type": "boolean",
     "default": true,
     "title": "Generate ThemeExtension",
-    "description": "Generate EdnetTokens ThemeExtension with lerp support."
+    "description": "Generate EdnetTokens ThemeExtension with lerp support.",
+    "category": "Generators"
   },
-  "generateEdnetDsl": {
+  {
     "key": "generateEdnetDsl",
     "type": "boolean",
     "default": false,
     "title": "Generate EDNet DSL v2 YAML",
-    "description": "Generate domain model YAML from component structure with ednet:* custom properties."
+    "description": "Generate domain model YAML from component structure with ednet:* custom properties.",
+    "category": "Generators"
   },
-  "classPrefix": {
+  {
     "key": "classPrefix",
     "type": "string",
     "default": "Ednet",
     "title": "Class Prefix",
-    "description": "Prefix for generated Dart class names (e.g. Ednet, Morfik)."
+    "description": "Prefix for generated Dart class names (e.g. Ednet, Morfik).",
+    "category": "Naming"
   },
-  "includeDocComments": {
+  {
     "key": "includeDocComments",
     "type": "boolean",
     "default": true,
     "title": "Include Doc Comments",
-    "description": "Add /// doc comments to generated Dart constants."
+    "description": "Add /// doc comments to generated Dart constants.",
+    "category": "Other"
   }
-}
+]

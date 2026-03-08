@@ -7,7 +7,7 @@
   "organization": "EDNet",
   "homepage": "https://github.com/ednet-org/supernova-exporter",
   "engine": "latest",
-  "executable": "/dist/index.js",
+  "executable": "/dist/build.js",
   "usesBrands": true,
   "usesThemes": true,
   "tags": ["Tokens", "Flutter", "Dart", "ThemeData"]
