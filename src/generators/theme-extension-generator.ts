@@ -82,8 +82,9 @@ export class ThemeExtensionGenerator {
     const wrappers: TokenWrapper[] = [];
     const prefix = this.config.classPrefix;
 
-    // Spacing wrapper
-    const spacingTokens = filterTokensByType(tokens, ['Space']);
+    // Spacing wrapper (Space + Dimension routed to spacing)
+    const spacingPatterns = ['spacing', 'space', 'gap', 'padding', 'margin', 'inset'];
+    const spacingTokens = filterTokensByType(tokens, ['Space', 'Dimension'], spacingPatterns);
     if (spacingTokens.length > 0) {
       wrappers.push({
         className: `${prefix}SpacingTokensGen`,
@@ -98,8 +99,9 @@ export class ThemeExtensionGenerator {
       });
     }
 
-    // Border wrapper
-    const borderTokens = filterTokensByType(tokens, ['BorderRadius', 'BorderWidth']);
+    // Border wrapper (BorderRadius + BorderWidth + Dimension routed to borders)
+    const borderPatterns = ['border', 'radius', 'corner', 'stroke'];
+    const borderTokens = filterTokensByType(tokens, ['BorderRadius', 'BorderWidth', 'Dimension'], borderPatterns);
     if (borderTokens.length > 0) {
       wrappers.push({
         className: `${prefix}BorderTokensGen`,

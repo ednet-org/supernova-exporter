@@ -29,7 +29,11 @@ export class TokenGenerator {
     const files: OutputFile[] = [];
 
     for (const category of TOKEN_CATEGORIES) {
-      const categoryTokens = filterTokensByType(tokens, category.tokenTypes);
+      const categoryTokens = filterTokensByType(
+        tokens,
+        category.tokenTypes,
+        category.dimensionNamePatterns,
+      );
       if (categoryTokens.length === 0) continue;
 
       const file = this.generateCategoryFile(category, categoryTokens);
@@ -87,6 +91,10 @@ export class TokenGenerator {
       case 'fontWeights':
         imports = ["package:flutter/material.dart"];
         sections = this.buildFontWeightSections(tokens);
+        break;
+      case 'dimensions':
+        imports = [];
+        sections = this.buildDimensionSections(tokens);
         break;
       default:
         return null;
@@ -173,16 +181,38 @@ export class TokenGenerator {
   }
 
   private buildElevationSections(tokens: any[]): ClassSection[] {
-    const fields: ClassField[] = tokens.map((token) => {
-      const mapped = mapElevationToken(token as any);
-      return {
-        name: mapped.name,
-        type: 'double',
-        value: mapped.dartValue,
-        docComment: mapped.docComment,
-      };
-    });
-    return [{ comment: 'Elevation Levels', fields }];
+    const shadowFields: ClassField[] = [];
+    const dimensionFields: ClassField[] = [];
+
+    for (const token of tokens) {
+      if (token.tokenType === 'Shadow') {
+        const mapped = mapElevationToken(token as any);
+        shadowFields.push({
+          name: mapped.name,
+          type: 'double',
+          value: mapped.dartValue,
+          docComment: mapped.docComment,
+        });
+      } else {
+        // Dimension token routed to elevation
+        const mapped = mapSpacingToken(token as any);
+        dimensionFields.push({
+          name: mapped.name,
+          type: 'double',
+          value: mapped.dartValue,
+          docComment: mapped.docComment,
+        });
+      }
+    }
+
+    const sections: ClassSection[] = [];
+    if (shadowFields.length > 0) {
+      sections.push({ comment: 'Shadow Elevation', fields: shadowFields });
+    }
+    if (dimensionFields.length > 0) {
+      sections.push({ comment: 'Elevation Levels', fields: dimensionFields });
+    }
+    return sections;
   }
 
   private buildBorderSections(tokens: any[]): ClassSection[] {
@@ -190,7 +220,11 @@ export class TokenGenerator {
     const widthFields: ClassField[] = [];
 
     for (const token of tokens) {
-      if (token.tokenType === 'BorderRadius') {
+      const nameLower = (token.name ?? '').toLowerCase();
+      const isRadius = token.tokenType === 'BorderRadius' ||
+        nameLower.includes('radius') || nameLower.includes('corner');
+
+      if (isRadius) {
         const mapped = mapRadiusToken(token as any);
         radiusFields.push({
           name: mapped.name,
@@ -221,12 +255,25 @@ export class TokenGenerator {
 
   private buildAnimationSections(tokens: any[]): ClassSection[] {
     const fields: ClassField[] = tokens.map((token) => {
-      const mapped = mapAnimationToken(token as any);
+      if (token.tokenType === 'Duration') {
+        const mapped = mapAnimationToken(token as any);
+        return {
+          name: mapped.name,
+          type: 'Duration',
+          value: mapped.dartValue,
+          docComment: mapped.docComment,
+        };
+      }
+      // Dimension token with duration/animation name — emit as milliseconds Duration
+      const measure = token.value?.measure ?? 0;
+      const unit = token.value?.unit ?? 'ms';
+      const ms = unit === 's' ? Math.round(measure * 1000) : Math.round(measure);
+      const name = token.name.split('/').pop() ?? token.name;
       return {
-        name: mapped.name,
+        name: name.charAt(0).toLowerCase() + name.slice(1).replace(/[-_/\s]+(.)?/g, (_: string, c: string) => c ? c.toUpperCase() : ''),
         type: 'Duration',
-        value: mapped.dartValue,
-        docComment: mapped.docComment,
+        value: `Duration(milliseconds: ${ms})`,
+        docComment: token.description ?? `${measure}${unit}`,
       };
     });
     return [{ comment: 'Animation Durations', fields }];
@@ -234,12 +281,23 @@ export class TokenGenerator {
 
   private buildOpacitySections(tokens: any[]): ClassSection[] {
     const fields: ClassField[] = tokens.map((token) => {
-      const mapped = mapOpacityToken(token as any);
+      if (token.tokenType === 'Opacity') {
+        const mapped = mapOpacityToken(token as any);
+        return {
+          name: mapped.name,
+          type: 'double',
+          value: mapped.dartValue,
+          docComment: mapped.docComment,
+        };
+      }
+      // Dimension token with opacity name — emit as double 0.0-1.0
+      const measure = token.value?.measure ?? 1;
+      const name = token.name.split('/').pop() ?? token.name;
       return {
-        name: mapped.name,
+        name: name.charAt(0).toLowerCase() + name.slice(1).replace(/[-_/\s]+(.)?/g, (_: string, c: string) => c ? c.toUpperCase() : ''),
         type: 'double',
-        value: mapped.dartValue,
-        docComment: mapped.docComment,
+        value: measure > 1 ? (measure / 100).toFixed(2) : measure.toFixed(2),
+        docComment: token.description ?? `Opacity ${measure}`,
       };
     });
     return [{ comment: 'Opacity Levels', fields }];
@@ -256,6 +314,30 @@ export class TokenGenerator {
       };
     });
     return [{ comment: 'Gradients', fields }];
+  }
+
+  private buildDimensionSections(tokens: any[]): ClassSection[] {
+    const deduped = this.deduplicateTokens(tokens);
+    const grouped = new Map<string, ClassField[]>();
+
+    for (const token of deduped) {
+      const mapped = mapSpacingToken(token as any);
+      const parts = token.name.split('/');
+      const group = parts.length > 1 ? parts[0] : 'General';
+
+      if (!grouped.has(group)) grouped.set(group, []);
+      grouped.get(group)!.push({
+        name: mapped.name,
+        type: 'double',
+        value: mapped.dartValue,
+        docComment: mapped.docComment,
+      });
+    }
+
+    return Array.from(grouped.entries()).map(([group, fields]) => ({
+      comment: group.charAt(0).toUpperCase() + group.slice(1),
+      fields,
+    }));
   }
 
   private buildFontWeightSections(tokens: any[]): ClassSection[] {

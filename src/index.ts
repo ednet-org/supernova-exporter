@@ -20,7 +20,7 @@ import { ThemeExtensionGenerator } from './generators/theme-extension-generator'
 import { BrandThemeGenerator } from './generators/brand-theme-generator';
 import { EdnetDslGenerator } from './generators/ednet-dsl-generator';
 import { BrandResolver } from './helpers/brand-resolver';
-import { OutputFile } from './helpers/file-builder';
+import { OutputFile, createOutputFile } from './helpers/file-builder';
 
 /** Resolved exporter configuration */
 export const exportConfiguration =
@@ -55,6 +55,34 @@ Pulsar.export(
     const tokenGroups = await sdk.tokens.getTokenGroups(
       remoteVersionIdentifier,
     );
+
+    // Build group path lookup: groupId -> full path
+    const groupPathMap = new Map<string, string>();
+    const groupById = new Map<string, any>();
+    for (const g of tokenGroups) {
+      groupById.set(g.id, g);
+    }
+    function resolveGroupPath(groupId: string): string {
+      if (groupPathMap.has(groupId)) return groupPathMap.get(groupId)!;
+      const group = groupById.get(groupId);
+      if (!group) return '';
+      const parentPath = group.parentGroupId
+        ? resolveGroupPath(group.parentGroupId)
+        : '';
+      const path = parentPath
+        ? `${parentPath}/${group.name}`
+        : group.name;
+      groupPathMap.set(groupId, path);
+      return path;
+    }
+
+    // Enrich tokens with their group path for routing
+    for (const token of fullTokenSet) {
+      const groupPath = (token as any).parentGroupId
+        ? resolveGroupPath((token as any).parentGroupId)
+        : '';
+      (token as any)._groupPath = groupPath;
+    }
 
     // Start with full set, apply brand filter and themes
     let tokens = [...fullTokenSet];
@@ -160,6 +188,25 @@ Pulsar.export(
         ),
       );
     }
+
+    // Debug: emit token manifest for routing analysis
+    const dimTokens = tokens.filter(
+      (t: any) => t.tokenType === 'Dimension',
+    );
+    const manifest = dimTokens.map((t: any) => ({
+      name: t.name,
+      groupPath: t._groupPath || '',
+      value: t.value?.measure ?? null,
+      unit: t.value?.unit ?? '',
+    }));
+    const manifestDir = `${config.outputPath}/${brandResolver.getOutputSubdirectory()}`;
+    outputFiles.push(
+      createOutputFile(
+        manifestDir,
+        '_debug_dimension_tokens.json',
+        JSON.stringify(manifest, null, 2),
+      ),
+    );
 
     // Brand-specific theme wrapper
     const brandThemeGen = new BrandThemeGenerator(

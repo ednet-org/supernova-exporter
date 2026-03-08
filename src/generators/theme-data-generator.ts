@@ -27,14 +27,27 @@ export class ThemeDataGenerator {
 
     const header = generateHeader({ brand: brandName });
 
+    // Detect which token types exist to conditionally import
+    const tokenTypes = new Set(tokens.map((t: any) => t.tokenType));
+    const hasColors = tokenTypes.has('Color');
+    const hasTypography = tokenTypes.has('Typography');
+    const hasShadows = tokenTypes.has('Shadow');
+    const hasDimensions = tokenTypes.has('Dimension');
+    const hasElevation = hasShadows || hasDimensions;
+    const hasBorders = tokenTypes.has('Border') || tokenTypes.has('BorderWidth') ||
+      tokenTypes.has('BorderRadius') || hasDimensions;
+    const hasSpacing = tokenTypes.has('Space') || hasDimensions;
+
+    const imports: string[] = ["import 'package:flutter/material.dart';"];
+    if (hasColors) imports.push("import 'colors.g.dart';");
+    if (hasTypography) imports.push("import 'typography.g.dart';");
+    if (hasElevation) imports.push("import 'elevation.g.dart';");
+    if (hasBorders) imports.push("import 'borders.g.dart';");
+    if (hasSpacing) imports.push("import 'spacing.g.dart';");
+    if (hasDimensions) imports.push("import 'dimensions.g.dart';");
+
     const content = `${header}
-import 'package:flutter/material.dart';
-import 'colors.g.dart';
-import 'typography.g.dart';
-import 'elevation.g.dart';
-import 'borders.g.dart';
-import 'spacing.g.dart';
-import 'opacity.g.dart';
+${imports.join('\n')}
 
 /// Builds complete [ThemeData] from Supernova design tokens.
 ///
