@@ -5,9 +5,10 @@
   "version": "0.1.0",
   "author": "EDNet Platform",
   "organization": "EDNet",
-  "source": "src/index.ts",
+  "homepage": "https://github.com/ednet-org/supernova-exporter",
   "engine": "latest",
+  "executable": "/dist/index.js",
   "usesBrands": true,
   "usesThemes": true,
-  "config": "config.json"
+  "tags": ["Tokens", "Flutter", "Dart", "ThemeData"]
 }
