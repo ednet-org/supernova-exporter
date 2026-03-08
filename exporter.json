@@ -6,7 +6,7 @@
   "author": "EDNet Platform",
   "organization": "EDNet",
   "source": "src/index.ts",
-  "engine": "pulsar-v3",
+  "engine": "latest",
   "usesBrands": true,
   "usesThemes": true,
   "config": "config.json"
