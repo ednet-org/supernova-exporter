@@ -83,7 +83,7 @@ export class ThemeExtensionGenerator {
     const prefix = this.config.classPrefix;
 
     // Spacing wrapper
-    const spacingTokens = filterTokensByType(tokens, ['Space', 'Size', 'Dimension']);
+    const spacingTokens = filterTokensByType(tokens, ['Space']);
     if (spacingTokens.length > 0) {
       wrappers.push({
         className: `${prefix}SpacingTokensGen`,

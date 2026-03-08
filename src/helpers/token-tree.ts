@@ -47,7 +47,7 @@ export const TOKEN_CATEGORIES: TokenCategory[] = [
     name: 'spacing',
     dartClassName: 'Spacing',
     dartFileName: 'spacing.g.dart',
-    tokenTypes: ['Space', 'Size', 'Dimension'],
+    tokenTypes: ['Space'],
   },
   {
     name: 'typography',

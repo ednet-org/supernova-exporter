@@ -4,14 +4,15 @@ import { BrandResolver } from '../helpers/brand-resolver';
 import { TOKEN_CATEGORIES, filterTokensByType, TokenCategory } from '../helpers/token-tree';
 import { generateHeader } from '../templates/header';
 import { buildAbstractFinalClass, ClassSection, ClassField } from '../templates/class-template';
-import { mapColorToken, ColorTokenValue } from '../mappers/color-mapper';
-import { mapSpacingToken, DimensionTokenValue } from '../mappers/spacing-mapper';
-import { mapTypographyToken, TypographyTokenValue } from '../mappers/typography-mapper';
-import { mapElevationToken, ShadowTokenValue } from '../mappers/elevation-mapper';
-import { mapBorderWidthToken, mapRadiusToken, BorderWidthTokenValue, RadiusTokenValue } from '../mappers/border-mapper';
-import { mapAnimationToken, DurationTokenValue } from '../mappers/animation-mapper';
-import { mapOpacityToken, OpacityTokenValue } from '../mappers/opacity-mapper';
-import { mapGradientToken, GradientTokenValue } from '../mappers/gradient-mapper';
+import { mapColorToken } from '../mappers/color-mapper';
+import { mapSpacingToken } from '../mappers/spacing-mapper';
+import { mapTypographyToken } from '../mappers/typography-mapper';
+import { mapElevationToken } from '../mappers/elevation-mapper';
+import { mapBorderWidthToken, mapRadiusToken } from '../mappers/border-mapper';
+import { mapAnimationToken } from '../mappers/animation-mapper';
+import { mapOpacityToken } from '../mappers/opacity-mapper';
+import { mapGradientToken } from '../mappers/gradient-mapper';
+import { tokenPathToUniqueDartIdentifier } from '../helpers/naming';
 
 /**
  * Generates Dart token constant files from Supernova tokens.
@@ -104,17 +105,35 @@ export class TokenGenerator {
     return createOutputFile(outputDir, category.dartFileName, content);
   }
 
-  private buildColorSections(tokens: any[]): ClassSection[] {
-    const grouped = new Map<string, ClassField[]>();
-
+  /** Deduplicate tokens by name path, keeping the last occurrence. */
+  private deduplicateTokens(tokens: any[]): any[] {
+    const seen = new Map<string, any>();
     for (const token of tokens) {
+      seen.set(token.name, token);
+    }
+    return Array.from(seen.values());
+  }
+
+  private buildColorSections(tokens: any[]): ClassSection[] {
+    const deduped = this.deduplicateTokens(tokens);
+    const grouped = new Map<string, ClassField[]>();
+    const seenNames = new Set<string>();
+
+    for (const token of deduped) {
       const mapped = mapColorToken(token as any);
       const parts = token.name.split('/');
       const group = parts.length > 1 ? parts[0] : 'General';
 
+      // Use full-path name if short name would cause duplicate
+      let fieldName = mapped.name;
+      if (seenNames.has(fieldName)) {
+        fieldName = tokenPathToUniqueDartIdentifier(token.name, 'color');
+      }
+      seenNames.add(fieldName);
+
       if (!grouped.has(group)) grouped.set(group, []);
       grouped.get(group)!.push({
-        name: mapped.name,
+        name: fieldName,
         type: 'Color',
         value: mapped.dartValue,
         docComment: mapped.docComment,
