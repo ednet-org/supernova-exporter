@@ -3,32 +3,59 @@ import { ThemeDataGenerator } from '../../src/generators/theme-data-generator';
 import { BrandResolver } from '../../src/helpers/brand-resolver';
 import { DEFAULT_CONFIG } from '../../src/config/config-defaults';
 
+/** Mock tokens that match the Supernova SDK structure. */
+const mockColorTokens = [
+  { name: 'primary', tokenType: 'Color', value: { color: { r: 8, g: 145, b: 178 }, opacity: { measure: 1 } } },
+  { name: 'onPrimary', tokenType: 'Color', value: { color: { r: 255, g: 255, b: 255 }, opacity: { measure: 1 } } },
+  { name: 'surface', tokenType: 'Color', value: { color: { r: 246, g: 250, b: 254 }, opacity: { measure: 1 } } },
+];
+
+const mockTypographyTokens = [
+  { name: 'displayLarge', tokenType: 'Typography', value: { fontSize: { measure: 57 }, fontFamily: { text: 'Inter' }, fontWeight: { text: 'Regular' } } },
+  { name: 'bodyMedium', tokenType: 'Typography', value: { fontSize: { measure: 14 }, fontFamily: { text: 'Inter' }, fontWeight: { text: 'Regular' } } },
+];
+
+const mockDimensionTokens = [
+  { name: 'md', tokenType: 'Dimension', value: { measure: 12, unit: 'px' }, _groupPath: '' },
+  { name: 'lg', tokenType: 'Dimension', value: { measure: 16, unit: 'px' }, _groupPath: '' },
+  { name: 'level0', tokenType: 'Dimension', value: { measure: 0, unit: 'px' }, _groupPath: '' },
+];
+
+const allMockTokens = [...mockColorTokens, ...mockTypographyTokens, ...mockDimensionTokens];
+
 describe('ThemeDataGenerator', () => {
   const resolver = new BrandResolver('ednet_ds', undefined);
   const generator = new ThemeDataGenerator(DEFAULT_CONFIG, resolver);
 
   it('generates a theme_data.g.dart file', () => {
-    const files = generator.generate([]);
+    const files = generator.generate(allMockTokens);
     expect(files).toHaveLength(1);
     expect(files[0].fileName).toBe('theme_data.g.dart');
   });
 
   it('contains ThemeData builder function', () => {
-    const files = generator.generate([]);
+    const files = generator.generate(allMockTokens);
     expect(files[0].content).toContain('ThemeData buildEdnetTheme(');
     expect(files[0].content).toContain('Brightness brightness');
   });
 
-  it('references generated token classes', () => {
-    const files = generator.generate([]);
-    expect(files[0].content).toContain('EdnetColorsGen.');
-    expect(files[0].content).toContain('EdnetTypographyGen.');
-    expect(files[0].content).toContain('EdnetElevationGen.');
-    expect(files[0].content).toContain('EdnetBordersGen.');
+  it('references generated token classes when tokens exist', () => {
+    const content = generator.generate(allMockTokens)[0].content;
+    expect(content).toContain('EdnetColorsGen.');
+    expect(content).toContain('EdnetTypographyGen.');
+    expect(content).toContain('EdnetDimensionsGen.');
+  });
+
+  it('falls back to inline values when no tokens provided', () => {
+    const content = generator.generate([])[0].content;
+    // Should use Color(...) inline fallbacks instead of token refs
+    expect(content).toContain('Color(0xFF');
+    expect(content).not.toContain('EdnetColorsGen.');
+    expect(content).not.toContain('EdnetDimensionsGen.');
   });
 
   it('includes all Material 3 component themes', () => {
-    const content = generator.generate([])[0].content;
+    const content = generator.generate(allMockTokens)[0].content;
     expect(content).toContain('appBarTheme:');
     expect(content).toContain('cardTheme:');
     expect(content).toContain('inputDecorationTheme:');
@@ -58,7 +85,7 @@ describe('ThemeDataGenerator', () => {
       { ...DEFAULT_CONFIG, classPrefix: 'Morfik' },
       morfikResolver,
     );
-    const content = morfikGen.generate([])[0].content;
+    const content = morfikGen.generate(allMockTokens)[0].content;
     expect(content).toContain('ThemeData buildMorfikTheme(');
     expect(content).toContain('MorfikColorsGen.');
     expect(content).toContain('MorfikTypographyGen.');

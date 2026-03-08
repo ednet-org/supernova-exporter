@@ -20,7 +20,7 @@ import { ThemeExtensionGenerator } from './generators/theme-extension-generator'
 import { BrandThemeGenerator } from './generators/brand-theme-generator';
 import { EdnetDslGenerator } from './generators/ednet-dsl-generator';
 import { BrandResolver } from './helpers/brand-resolver';
-import { OutputFile, createOutputFile } from './helpers/file-builder';
+import { OutputFile } from './helpers/file-builder';
 
 /** Resolved exporter configuration */
 export const exportConfiguration =
@@ -188,25 +188,6 @@ Pulsar.export(
         ),
       );
     }
-
-    // Debug: emit token manifest for routing analysis
-    const dimTokens = tokens.filter(
-      (t: any) => t.tokenType === 'Dimension',
-    );
-    const manifest = dimTokens.map((t: any) => ({
-      name: t.name,
-      groupPath: t._groupPath || '',
-      value: t.value?.measure ?? null,
-      unit: t.value?.unit ?? '',
-    }));
-    const manifestDir = `${config.outputPath}/${brandResolver.getOutputSubdirectory()}`;
-    outputFiles.push(
-      createOutputFile(
-        manifestDir,
-        '_debug_dimension_tokens.json',
-        JSON.stringify(manifest, null, 2),
-      ),
-    );
 
     // Brand-specific theme wrapper
     const brandThemeGen = new BrandThemeGenerator(
